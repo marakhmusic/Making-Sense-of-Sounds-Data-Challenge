@@ -1,0 +1,25 @@
+import numpy as np
+import pandas as pd
+import warnings
+from Comparison_Code import accuracy_calculator
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.metrics import confusion_matrix
+from collections import Counter
+from Comparison_Code import split_the_data_and_normalize
+from Comparison_Code import split_the_data_and_zscorenormalize
+
+
+dataset = pd.read_csv('audio_dataset_fourtyfour.csv')
+newdataX = dataset.iloc[:, 2:42].values
+
+Effects = newdataX[0:300, :]
+Human = newdataX[300:600, :]
+Music = newdataX[600:900, :]
+Nature = newdataX[900:1200, :]
+Urban = newdataX[1200:1500, :]
+
+print(Effects.std(axis=0))
+print(Human.std(axis=0))
+print(Music.std(axis=0))
+print(Nature.std(axis=0))
+print(Urban.std(axis=0))

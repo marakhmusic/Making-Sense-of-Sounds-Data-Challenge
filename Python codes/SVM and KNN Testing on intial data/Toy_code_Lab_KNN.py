@@ -1,0 +1,68 @@
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn import metrics
+from sklearn.model_selection import KFold
+from sklearn.model_selection import cross_val_score
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.metrics import confusion_matrix
+from sklearn.metrics import accuracy_score
+import pandas as pd
+from sklearn.preprocessing import MinMaxScaler
+
+train_dataset = pd.read_csv('Train_data.csv')
+test_dataset = pd.read_csv('Test_data.csv')
+X_train = train_dataset.iloc[:, 2:42].values
+y_train = train_dataset.iloc[:, -1].values
+X_test = test_dataset.iloc[:, 2:42].values
+y_test = test_dataset.iloc[:, -1].values
+print("Train Dataset", np.shape(X_train))
+print("Train Labels", np.shape(y_train))
+print("Test Dataset", np.shape(X_test))
+print("Test Labels", np.shape(y_test))
+scaler = MinMaxScaler(feature_range=(0, 1))
+scaler.fit(X_train)
+X_train_normalized = scaler.transform(X_train)
+X_max = scaler.data_max_
+X_min = scaler.data_min_
+X_den = X_max - X_min
+X_test_scaled = np.subtract(X_test, X_min)
+X_test_normalized = np.divide(X_test_scaled, X_den)
+k_range = list(range(1, 31))
+k_scores = []
+for k in k_range:
+    knn = KNeighborsClassifier(n_neighbors=k)
+    scores = cross_val_score(knn, X_train, y_train, cv=10, scoring='accuracy')
+    k_scores.append(scores.mean())
+print("The scores for different values of neighbours is", k_scores)
+
+plt.plot(k_range, k_scores)
+plt.xlabel('Value of K for KNN')
+plt.ylabel('Cross-Validated Accuracy')
+plt.show()
+# print (k_scores.index(max(k_scores)))
+knn = KNeighborsClassifier(n_neighbors=1)
+# final_scores = cross_val_score(knn, X_train, y_train, cv=3, scoring='accuracy').mean()
+knn.fit(X_train_normalized, y_train)
+y_pred = knn.predict(X_test_normalized)
+c = confusion_matrix(y_test, y_pred)
+d = accuracy_score(y_test, y_pred)
+print(np.sum(c))
+print(c)
+print(d)
+accuracy = np.zeros(5)
+temp = np.zeros(5)
+i = 0
+j = 0
+while i < 5:
+    while j < 5:
+        if i == j:
+            temp[i] = c[i, j]
+            accuracy[i] = c[i, j]/np.sum(c[i, :])
+            print("The recall/sensitivity  for Label ", i, c[i, j]/np.sum(c[i, :]))
+            print("The precision for Label", i, c[i, j]/np.sum(c[:, i]))
+            j += 1
+        i += 1
+Complete_Accuracy = np.sum(temp)/np.sum(c)
+print ("The number of 0,1,2,3,4", accuracy)
+print ("The complete accuracy is", Complete_Accuracy)
